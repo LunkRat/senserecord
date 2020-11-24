@@ -1,0 +1,10 @@
+# SenseRecord tasks file.
+# Find the name of your board here:
+# https://brainflow.readthedocs.io/en/stable/UserAPI.html#brainflow-board-shim
+tasks:
+    my_experiment:
+        boards:
+            synthetic_board:
+                name: 'SYNTHETIC_BOARD'
+                params:
+                    serial-port: '/dev/ttyUSB0'

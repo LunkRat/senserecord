@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "senserecord"
+version = "0.1.0"
+description = "A cross-platform application for saving data streams from biosensor hardware."
+authors = ["Link Swanson <link@swanson.link>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+keywords = ["biosensor", "eeg", "meg", "recording", "capture"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed"
+]
+
+[tool.poetry.scripts]
+senserecord = "senserecord.main:console"
+senserecord-gui = "senserecord.main:gui"
+senserecord-api = "senserecord.main:restapi"
+
+
+[tool.poetry.dependencies]
+python = "^3.7"
+PyYAML = "^5.3.1"
+brainflow = "^3.7.1"
+PyQt5 = "^5.15.1"
+QtAwesome = "^1.0.1"
+pyshortcuts = "^1.7.1"
+typer = {extras = ["all"], version = "^0.3.2"}
+fastapi = "^0.61.2"
+uvicorn = "^0.12.2"
+aiofiles = "^0.6.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
