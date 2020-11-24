@@ -3,6 +3,7 @@
 # https://brainflow.readthedocs.io/en/stable/UserAPI.html#brainflow-board-shim
 tasks:
     my_experiment:
+        bidsroot: './'
         boards:
             synthetic_board:
                 name: 'SYNTHETIC_BOARD'
