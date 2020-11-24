@@ -91,7 +91,8 @@ class BoardRecord:
         except Exception as e:
             raise BoardException(str(e))
         # Write the sidecar json file:
-        self.write_sidecar()
+        # DISABLED FOR DEVELOPMENT OF CLI:
+        # self.write_sidecar()
 
     def release(self):
         """Releases session with board."""
