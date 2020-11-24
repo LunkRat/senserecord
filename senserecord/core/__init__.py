@@ -6,7 +6,7 @@ from pathlib import Path
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
 
 
-class BoardRecorder:
+class BoardRecord:
     """
     Provides methods for communicating with a board
     and saving data in BIDS-compliant files.
@@ -20,6 +20,8 @@ class BoardRecorder:
             raise BoardException(f"Invalid board name in config: {self.board_name}")
         else:
             self.board_id = BoardIds[self.board_name].value
+        # Suppress BrainFlow logs from stdout:
+        BoardShim.disable_board_logger()
         # Get and set vars with basic info about the board:
         self.sample_rate = BoardShim.get_sampling_rate(self.board_id)
         self.channel_names = BoardShim.get_eeg_names(self.board_id)
@@ -240,31 +242,33 @@ def valid_boardname(boardname: str):
 def process_yaml(path: str) -> dict:
     """Loads YAML from yml file and checks it for required keys."""
     try:
-        data = yaml.load(open(path), Loader=yaml.FullLoader)
+        try:
+            # Open the file and load into dict 'data'
+            data = yaml.load(open(path), Loader=yaml.FullLoader)
+        except Exception as e:
+            raise ConfigFileException(str(e))
+        # Audit the file for some required keys:
+        if "tasks" in data:
+            for task, values in data["tasks"].items():
+                if "bidsroot" not in values:
+                    raise ConfigFileException(
+                        f"Required key 'bidsroot' is missing from {task} section of config file {path}"
+                    )
+                if "boards" in values:
+                    for board, settings in values["boards"].items():
+                        if "name" not in settings:
+                            raise ConfigFileException(
+                                f"Required key 'name' is missing from {board} section of {task} in config file {path}"
+                            )
+                        if not valid_boardname(settings["name"]):
+                            raise ConfigFileException(
+                                f"Invalid name '{settings['name']}' in {board} section of {task} in config file {path}"
+                            )
+        else:
+            raise ConfigFileException(
+                f"Required root key 'tasks' is missing from the config file {path}"
+            )
+        # Got past all exceptions so return the dict:
         return data
     except Exception as e:
         raise ConfigFileException(str(e))
-    if "tasks" in data:
-        for task, values in data["tasks"].items():
-            if "bidsroot" not in values:
-                raise ConfigFileException(
-                    f"Required key 'bidsroot' is missing from {task} section of config file {path}"
-                )
-            if "boards" in values:
-                for board, settings in task["boards"].items():
-                    if "name" not in settings:
-                        raise ConfigFileException(
-                            f"Required key 'name' is missing from {board} section of {task} in config file {path}"
-                        )
-                    elif not valid_boardname(settings["name"]):
-                        raise ConfigFileException(
-                            f"Boardname {settings['name']} is unknown in {board} section of {task} in config file {path}"
-                        )
-            else:
-                raise ConfigFileException(
-                    f"Required key 'boards' is missing from {task} section of config file {path}"
-                )
-    else:
-        raise ConfigFileException(
-            f"Required root key 'tasks' is missing from the config file {path}"
-        )
