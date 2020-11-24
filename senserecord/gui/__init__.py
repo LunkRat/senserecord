@@ -269,16 +269,17 @@ class MainWindow(QMainWindow):
         if hasattr(self, "config_file"):
             try:
                 self.config = process_yaml(self.config_file)
+                first_taskname = list(self.config["tasks"].keys())[0]
+                self.set_controls(first_taskname)  # default to first task when loading config
+                self.set_tasks_menu()
                 logging.info("Using configuration loaded from " + self.config_file)
                 self.statusBar().showMessage("Active config file: " + self.config_file)
             except Exception as e:
                 QMessageBox.critical(
                     self, "Invalid config file!", str(e), QMessageBox.Ok
                 )
+                logging.error(str(e))
 
-        first_taskname = list(self.config["tasks"].keys())[0]
-        self.set_controls(first_taskname)  # default to first task when loading config
-        self.set_tasks_menu()
 
     def clear_layout(self, layout):
         """Recursively deletes all widgets in given layout."""

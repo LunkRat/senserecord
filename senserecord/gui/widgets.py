@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
     QProgressBar,
 )
 import qtawesome as qta
-from senserecord.core import BoardRecorder
+from senserecord.core import BoardRecord
 
 # Custom widget class for Start/Stop record buttons:
 # (Thank you John Lim: https://www.learnpyqt.com/tutorials/widget-search-bar/)
@@ -47,7 +47,7 @@ class OnOffWidget(QWidget):
         if "params" not in self.config["board"]:
             self.config["board"]["params"] = {}
         # Construct the recorder object with minimum values:
-        self.recorder = BoardRecorder(
+        self.recorder = BoardRecord(
             self.config["board"]["name"], self.config["board"]["params"]
         )
         # Check the board status to see if it is reachable:
