@@ -8,7 +8,7 @@ from fastapi.openapi.docs import (
     get_swagger_ui_html,
     get_swagger_ui_oauth2_redirect_html,
 )
-from senserecord.core import BoardRecorder, valid_boardname
+from senserecord.core import BoardRecord, valid_boardname
 
 # fmt: off
 class ResultJson:
@@ -47,7 +47,7 @@ def home():
 
 @app.get("/status/{board}")
 def boardstatus(response: Response, board: str, board_params: Optional[str] = None):
-    """Returns the current status of a given board name"""
+    """Returns the current status of a given board name."""
     result = ResultJson(board)
     if not valid_boardname(board):
         result.body["status"] = "error"
@@ -61,7 +61,7 @@ def boardstatus(response: Response, board: str, board_params: Optional[str] = No
     else:
         # No active recorders found, so see if we can create one,
         # ping it, get its status, then delete it:
-        recorder = BoardRecorder(board, board_params)
+        recorder = BoardRecord(board, board_params)
         recorder.ping()
         result.body["result"]["board"]["is_ready"] = recorder.is_ready
         result.body["result"]["board"]["is_recording"] = recorder.is_recording
@@ -91,7 +91,7 @@ def start(
         result.body["details"].append(f"Boardname {board} is unknown")
         return result.body
     if board not in recorders:
-        recorder = BoardRecorder(board, board_params)
+        recorder = BoardRecord(board, board_params)
         recorders[board] = recorder
     else:
         recorder = recorders[board]
