@@ -8,6 +8,7 @@ from fastapi.openapi.docs import (
     get_swagger_ui_html,
     get_swagger_ui_oauth2_redirect_html,
 )
+from brainflow.board_shim import IpProtocolType
 from senserecord.core import BoardRecord, valid_boardname
 
 # fmt: off
@@ -36,7 +37,8 @@ app = FastAPI(
 )
 
 
-# We register active recorders in a dict to keep track of them:
+# We register active recorders in a dict to keep track of them
+# in between http calls:
 recorders = {}
 
 
@@ -45,23 +47,54 @@ def home():
     return RedirectResponse("/docs")
 
 
-@app.get("/status/{board}")
-def boardstatus(response: Response, board: str, board_params: Optional[str] = None):
+@app.get("/status/{board_name}")
+def boardstatus(
+    response: Response, 
+    board_name: str,
+    serial_port: Optional[str] = "",
+    mac_address: Optional[str] = "",
+    ip_address: Optional[str] = "",
+    ip_port: Optional[int] = 0,
+    ip_protocol: Optional[int] = 0,
+    other_info: Optional[str] = "",
+    timeout: Optional[int] = 0,
+    serial_number: Optional[str] = "",
+    board_file: Optional[str] = "",
+):
     """Returns the current status of a given board name."""
-    result = ResultJson(board)
-    if not valid_boardname(board):
+    result = ResultJson(board_name)
+    if not valid_boardname(board_name):
         result.body["status"] = "error"
-        result.body["details"].append(f"Boardname {board} is unknown")
+        result.body["details"].append(f"Boardname {board_name} is unknown")
         response.status_code = 422
         return result.body
-    if board in recorders:
-        recorders[board].ping()
-        result.body["result"]["board"]["is_ready"] = recorders[board].is_ready
-        result.body["result"]["board"]["is_recording"] = recorders[board].is_recording
+    if board_name in recorders:
+        recorder = recorders[board_name]
+        recorder.ping()
+        result.body["result"]["board"]["is_ready"] = recorder.is_ready
+        result.body["result"]["board"]["is_recording"] = recorder.is_recording
     else:
         # No active recorders found, so see if we can create one,
         # ping it, get its status, then delete it:
-        recorder = BoardRecord(board, board_params)
+        try:
+            recorder = BoardRecord(
+                board_name=board_name,
+                serial_port=serial_port,
+                mac_address=mac_address,
+                ip_address=ip_address,
+                ip_port=ip_port,
+                ip_protocol=ip_protocol,
+                other_info=other_info,
+                timeout=timeout,
+                serial_number=serial_number,
+                board_file=board_file,
+            )
+            recorders[board_name] = recorder
+        except Exception as e:
+            result.body["status"] = "error"
+            result.body["details"].append(str(e))
+            response.status_code = 500
+            return result.body
         recorder.ping()
         result.body["result"]["board"]["is_ready"] = recorder.is_ready
         result.body["result"]["board"]["is_recording"] = recorder.is_recording
@@ -69,88 +102,120 @@ def boardstatus(response: Response, board: str, board_params: Optional[str] = No
     return result.body
 
 
-@app.get("/start/{board}")
+@app.get("/start/{board_name}")
 def start(
-    board: str,
+    response: Response, 
+    board_name: str,
     bidsroot: str,
-    sub: str,
-    ses: str,
-    task: str,
-    run: str,
-    board_params: Optional[dict] = {},
-    data_type: Optional[str] = None,
-    modality: Optional[str] = None,
-    acq: Optional[str] = None,
-    metadata: Optional[dict] = {},
+    serial_port: Optional[str] = "",
+    mac_address: Optional[str] = "",
+    ip_address: Optional[str] = "",
+    ip_port: Optional[int] = 0,
+    ip_protocol: Optional[int] = 0,
+    other_info: Optional[str] = "",
+    timeout: Optional[int] = 0,
+    serial_number: Optional[str] = "",
+    board_file: Optional[str] = "",
+    # BIDS File naming parameters
+    sub: Optional[str] = "",
+    ses: Optional[str] = "",
+    task: Optional[str] = "",
+    run: Optional[str] = "",
+    data_type: Optional[str] = "",
+    modality: Optional[str] = "",
+    acq: Optional[str] = "",
+    # metadata: Optional[dict] = {},
 ):
-    """Starts a data stream from given board to a csv file. Streaming continues until stop() is called."""
+    """
+    Starts a data stream from given board to a csv file.
+    Streaming continues until stop() is called.
+    """
 
-    result = ResultJson(board)
-    if not valid_boardname(board):
+    result = ResultJson(board_name)
+    if not valid_boardname(board_name):
         result.body["status"] = "error"
-        result.body["details"].append(f"Boardname {board} is unknown")
+        result.body["details"].append(f"Boardname {board_name} is unknown")
+        response.status_code = 422
         return result.body
-    if board not in recorders:
-        recorder = BoardRecord(board, board_params)
-        recorders[board] = recorder
+    if board_name not in recorders:
+        try:
+            recorder = BoardRecord(
+                board_name=board_name,
+                serial_port=serial_port,
+                mac_address=mac_address,
+                ip_address=ip_address,
+                ip_port=ip_port,
+                ip_protocol=ip_protocol,
+                other_info=other_info,
+                timeout=timeout,
+                serial_number=serial_number,
+                board_file=board_file,
+            )
+            recorders[board_name] = recorder
+        except Exception as e:
+            result.body["status"] = "error"
+            result.body["details"].append(str(e))
+            response.status_code = 500
+            return result.body
     else:
-        recorder = recorders[board]
-    user_input = {
-        "task": task,
-        "run": run,
-        "sub": sub,
-        "ses": ses,
-    }
-    if bool(data_type):
-        user_input["type"] = data_type
-    if bool(acq):
-        user_input["acq"] = acq
-    if bool(modality):
-        user_input["modality"] = modality
+        recorder = recorders[board_name]
     try:
-        recorder.start(bidsroot, user_input, metadata)
+        recorder.start(
+            bidsroot=bidsroot,
+            sub=sub,
+            ses=ses,
+            task=task,
+            run=run,
+            data_type=data_type,
+            modality=modality,
+            acq=acq,
+            # passing empty dict; feature is in dev
+            metadata={},
+        )
     except Exception as e:
         result.body["status"] = "error"
         result.body["details"].append(str(e))
+        response.status_code = 500
     recorder.ping()
-    result.body["result"]["board"]["is_ready"] = recorders[board].is_ready
-    result.body["result"]["board"]["is_recording"] = recorders[board].is_recording
+    result.body["result"]["board"]["is_ready"] = recorder.is_ready
+    result.body["result"]["board"]["is_recording"] = recorder.is_recording
     return result.body
 
 
-@app.get("/stop/{board}")
-def stop(board: str):
-    """Stops data stream from given board and triggers writing post-recording files."""
+@app.get("/stop/{board_name}")
+def stop(response: Response, board_name: str):
+    """Stops data stream from given board_name and triggers writing post-recording files."""
 
-    result = ResultJson(board)
-    if not valid_boardname(board):
+    result = ResultJson(board_name)
+    if not valid_boardname(board_name):
         result.body["status"] = "error"
-        result.body["details"].append(f"Boardname {board} is unknown")
+        result.body["details"].append(f"Boardname {board_name} is unknown")
+        response.status_code = 422
         return result.body
-    if board in recorders:
-        if recorders[board].is_recording:
+    if board_name in recorders:
+        recorder = recorders[board_name]
+        if recorder.is_recording:
             try:
                 # Stop the file stream:
-                recorders[board].stop()
-                result.body["result"]["board"]["is_ready"] = recorders[board].is_ready
-                result.body["result"]["board"]["is_recording"] = recorders[
-                    board
-                ].is_recording
+                recorder.stop()
+                result.body["result"]["board"]["is_ready"] = recorder.is_ready
+                result.body["result"]["board"]["is_recording"] = recorder.is_recording
                 # Remove the recorder object from the recorders dict:
-                recorder = recorders.pop(board)
+                recorder = recorders.pop(board_name)
                 # Delete the recorder object
                 del recorder
             except Exception as e:
                 result.body["status"] = "error"
                 result.body["details"].append(str(e))
-                result.body["result"]["board"]["is_recording"] = recorders[
-                    board
-                ].is_recording
+                result.body["result"]["board"]["is_recording"] = recorder.is_recording
+                response.status_code = 500
         else:
-            result.body["details"].append(f"{board} had no active sessions to stop.")
+            result.body["details"].append(
+                f"{board_name} had no active sessions to stop."
+            )
             result.body["result"]["board"]["is_recording"] = False
     else:
-        result.body["details"].append(f"{board} had no active sessions to stop.")
+        result.body["details"].append(f"{board_name} had no active sessions to stop.")
         result.body["result"]["board"]["is_recording"] = False
     return result.body
 

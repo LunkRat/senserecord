@@ -6,32 +6,44 @@ from pathlib import Path
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
 
 
-class BoardRecord:
+class BoardRecord(object):
     """
     Provides methods for communicating with a board
     and saving data in BIDS-compliant files.
     """
 
-    def __init__(self, board_name: str, board_params: dict = {}):
+    def __init__(
+        self,
+        board_name: str,
+        serial_port: str = "",
+        mac_address: str = "",
+        ip_address: str = "",
+        ip_port: int = 0,
+        ip_protocol: int = 0,
+        other_info: str = "",
+        timeout: int = 0,
+        serial_number: str = "",
+        board_file: str = "",
+    ):
 
-        # Construct board using the BrainFlow API:
         self.board_name = board_name
         if not valid_boardname(board_name):
             raise BoardException(f"Invalid board name in config: {self.board_name}")
         else:
             self.board_id = BoardIds[self.board_name].value
-        # Suppress BrainFlow logs from stdout:
-        BoardShim.disable_board_logger()
-        # Get and set vars with basic info about the board:
-        self.sample_rate = BoardShim.get_sampling_rate(self.board_id)
-        self.channel_names = BoardShim.get_eeg_names(self.board_id)
-        self.channel_count = len(BoardShim.get_eeg_channels(self.board_id))
-        # Prepare the board params:
+        # Prepare the board params object:
         self.params = BrainFlowInputParams()
-        # Pass all board params from argument dict
-        # into the BrainFlowInputParams object:
-        for name, value in board_params.items():
-            setattr(self.params, name, value)
+        # Load params into the object from init function args:
+        self.params.serial_port = serial_port
+        self.params.mac_address = mac_address
+        self.params.ip_address = ip_address
+        self.params.ip_port = ip_port
+        self.params.ip_protocol = ip_protocol
+        self.params.other_info = other_info
+        self.params.timeout = timeout
+        self.params.serial_number = serial_number
+        self.params.file = board_file
+
         # Construct the board object:
         try:
             self.board = BoardShim(self.board_id, self.params)
@@ -59,7 +71,18 @@ class BoardRecord:
                 self.is_ready = False
                 return False
 
-    def start(self, bidsroot: str, user_input: dict, metadata: dict = {}):
+    def start(
+        self,
+        bidsroot: str,
+        sub: str = "",
+        ses: str = "",
+        task: str = "",
+        run: str = "",
+        data_type: str = "",
+        modality: str = "",
+        acq: str = "",
+        metadata: dict = {},
+    ):
         """Start data stream from board and save to output file"""
         self.bidsroot = bidsroot
         # Raise an exception if the BIDS base path does not exist:
@@ -67,7 +90,13 @@ class BoardRecord:
             raise FileSystemException(
                 f"Non-existent base directory path specified in config. Check config or create the directory: {self.bidsroot}"
             )
-        self.user_input = user_input
+        self.sub = sub
+        self.ses = ses
+        self.task = task
+        self.run = run
+        self.data_type = data_type
+        self.modality = modality
+        self.acq = acq
         self.metadata = metadata
         # Set make file paths and set variables:
         self.set_file_paths()
@@ -107,29 +136,29 @@ class BoardRecord:
     def set_file_paths(self):
         """Generates file paths and sets file path variables for recording."""
         # ref: https://bids-specification.readthedocs.io/en/stable/02-common-principles.html
-        if "type" not in self.user_input:
-            # No type was given in config or user input,
+        if not bool(self.data_type):
+            # No type was given,
             # so provide a sensible default:
-            if "modality" in self.user_input:
-                self.user_input["type"] = self.user_input["modality"]
+            if bool(self.modality):
+                self.data_type = self.modality
             else:
-                self.user_input["type"] = "DATA-TYPE-UNKNOWN"
-        if "modality" not in self.user_input:
+                self.data_type = "DATA-TYPE-UNKNOWN"
+        if not bool(self.modality):
             # No modality was given in config or user input,
             # so provide a sensible default:
-            if "type" in self.user_input:
-                self.user_input["modality"] = self.user_input["type"]
+            if bool(self.data_type):
+                self.modality = self.data_type
             else:
-                self.user_input["modality"] = "MODALITY-UNKNOWN"
+                self.modality = "MODALITY-UNKNOWN"
         # Construct the path to the recording output directory:
         self.data_path = os.path.join(
             self.bidsroot,
             # we are recording raw csv,
             # so we output to ./sourcedata
             "sourcedata",
-            "sub-" + self.user_input["sub"],
-            "ses-" + self.user_input["ses"],
-            self.user_input["type"],
+            "sub-" + self.sub,
+            "ses-" + self.ses,
+            self.data_type,
             "",  # trailing slash
         )
         # Ensure the recording output directory exists:
@@ -139,15 +168,15 @@ class BoardRecord:
         # (ref: https://bids-specification.readthedocs.io/en/stable/02-common-principles.html):
         self.data_file = (
             "sub-"
-            + self.user_input["sub"]
+            + self.sub
             + "_ses-"
-            + self.user_input["ses"]
+            + self.ses
             + "_task-"
-            + self.user_input["task"]
+            + self.task
             + "_run-"
-            + self.user_input["run"]
+            + self.run
             + "_"
-            + self.user_input["modality"]
+            + self.modality
             + ".csv"
         )
         # Ensure that the file does not already exist:
