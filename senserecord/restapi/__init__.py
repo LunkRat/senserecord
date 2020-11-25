@@ -49,7 +49,7 @@ def home():
 
 @app.get("/status/{board_name}")
 def boardstatus(
-    response: Response, 
+    response: Response,
     board_name: str,
     serial_port: Optional[str] = "",
     mac_address: Optional[str] = "",
@@ -104,7 +104,7 @@ def boardstatus(
 
 @app.get("/start/{board_name}")
 def start(
-    response: Response, 
+    response: Response,
     board_name: str,
     bidsroot: str,
     serial_port: Optional[str] = "",
