@@ -2,8 +2,12 @@ import os.path
 import logging
 import json
 import yaml
+from typing import Dict
 from pathlib import Path
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
+
+# Log settings:
+BoardShim.disable_board_logger()
 
 
 class BoardRecord(object):
@@ -31,6 +35,10 @@ class BoardRecord(object):
             raise BoardException(f"Invalid board name in config: {self.board_name}")
         else:
             self.board_id = BoardIds[self.board_name].value
+        # Get and set vars with basic info about the board:
+        self.sample_rate = BoardShim.get_sampling_rate(self.board_id)
+        self.channel_names = BoardShim.get_eeg_names(self.board_id)
+        self.channel_count = len(BoardShim.get_eeg_channels(self.board_id))
         # Prepare the board params object:
         self.params = BrainFlowInputParams()
         # Load params into the object from init function args:
@@ -81,7 +89,6 @@ class BoardRecord(object):
         data_type: str = "",
         modality: str = "",
         acq: str = "",
-        metadata: dict = {},
     ):
         """Start data stream from board and save to output file"""
         self.bidsroot = bidsroot
@@ -97,7 +104,6 @@ class BoardRecord(object):
         self.data_type = data_type
         self.modality = modality
         self.acq = acq
-        self.metadata = metadata
         # Set make file paths and set variables:
         self.set_file_paths()
         # Start streaming data from the board, save data to an output file:
@@ -166,7 +172,7 @@ class BoardRecord(object):
         # Construct the name of the recording output file
         # formatted to BIDS standard
         # (ref: https://bids-specification.readthedocs.io/en/stable/02-common-principles.html):
-        self.data_file = (
+        self.data_file_base = (
             "sub-"
             + self.sub
             + "_ses-"
@@ -177,31 +183,18 @@ class BoardRecord(object):
             + self.run
             + "_"
             + self.modality
-            + ".csv"
         )
         # Ensure that the file does not already exist:
-        if os.path.exists(self.data_path + self.data_file):
+        if os.path.exists(self.data_path + self.data_file_base + ".csv"):
             raise FileSystemException(
-                f"A file already exists at {self.data_path + self.data_file}.\n\nYou must either delete the file from its current location, or enter different information when starting the recording."
+                f"A file already exists at {self.data_path + self.data_file_base + '.csv'}.\n\nYou must either delete the file from its current location, or enter different information when starting the recording."
             )
-        self.file_param = "file://" + self.data_path + self.data_file + ":w"
+        self.file_param = (
+            "file://" + self.data_path + self.data_file_base + ".csv" + ":w"
+        )
 
     def write_sidecar(self):
         """Generates metadata and writes it to a BIDS json sidecar file."""
-        self.sidecar_file = (
-            self.data_path
-            + "sub-"
-            + self.user_input["sub"]
-            + "_ses-"
-            + self.user_input["ses"]
-            + "_task-"
-            + self.user_input["task"]
-            + "_run-"
-            + self.user_input["run"]
-            + "_"
-            + self.user_input["modality"]
-            + ".json"
-        )
         data = {
             "SamplingFrequency": self.sample_rate,
             "EEGChannelCount": self.channel_count,
@@ -229,12 +222,14 @@ class BoardRecord(object):
                     "modelname"
                 ]
         try:
-            with open(self.sidecar_file, "w") as outfile:
+            with open((self.data_file_base + ".json"), "w") as outfile:
                 json.dump(data, outfile, indent=4, sort_keys=True)
-            logging.info(f"Sidecar json file written to {self.sidecar_file}")
+            logging.info(
+                f"Sidecar json file written to {self.data_file_base + '.json'}"
+            )
         except Exception:
             raise FileSystemException(
-                f"Failed to create sidecar json file {self.sidecar_file}"
+                f"Failed to create sidecar json file {self.data_file_base + '.json'}"
             )
 
 
@@ -286,13 +281,13 @@ def process_yaml(path: str) -> dict:
                     )
                 if "boards" in values:
                     for board, settings in values["boards"].items():
-                        if "name" not in settings:
+                        if "board_name" not in settings:
                             raise ConfigFileException(
-                                f"Required key 'name' is missing from {board} section of {task} in config file {path}"
+                                f"Required key 'board_name' is missing from {board} section of {task} in config file {path}"
                             )
-                        if not valid_boardname(settings["name"]):
+                        if not valid_boardname(settings["board_name"]):
                             raise ConfigFileException(
-                                f"Invalid name '{settings['name']}' in {board} section of {task} in config file {path}"
+                                f"Invalid name '{settings['board_name']}' in {board} section of {task} in config file {path}"
                             )
         else:
             raise ConfigFileException(

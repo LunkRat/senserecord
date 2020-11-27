@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
                     taskname: {
                         "boards": {
                             args.board: {
-                                "name": args.board,
+                                "board_name": args.board,
                             }
                         }
                     }
@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
         # Set the controls (for the heart of the sun):
         self.controls.setLayout(self.controlsLayout)
 
-    def set_controls(self, name: str):
+    def set_controls(self, task_name: str):
         """Generates the labels and controls that appear in the controls area."""
 
         # Clear the current toolbar:
@@ -176,12 +176,12 @@ class MainWindow(QMainWindow):
         # Enable the refresh menu action in the View menu:
         self.refreshAct.setDisabled(False)
         # Load our task from global config:
-        self.task = self.config["tasks"][name]
+        task = self.config["tasks"][task_name]
         # Make the toolbar items:
-        if "label" in self.task:
-            label_text = self.task["label"]
+        if "label" in task:
+            label_text = task["label"]
         else:
-            label_text = name
+            label_text = task_name
         taskLabel = QLabel(chr(0xF10D5) + " " + "<strong>Task: </strong>" + label_text)
         taskLabel.setFont(qta.font("fa", 26))
 
@@ -196,13 +196,13 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(toolbarSpacer)
         self.toolbar.addAction(refreshButton)
         # Make the task info panel:
-        if "description" in self.task:
-            taskLabel.setToolTip(self.task["description"])
+        if "description" in task:
+            taskLabel.setToolTip(task["description"])
             taskDescription = QWidget()
             taskDescription.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
             descriptionLayout = QVBoxLayout()
             descriptionLayout.setAlignment(Qt.AlignTop)
-            descriptionLabel = QLabel(self.task["description"])
+            descriptionLabel = QLabel(task["description"])
             descriptionLabel.setWordWrap(True)
             descriptionHeading = QLabel(
                 chr(0xF0EA7) + " " + "<strong>Description: </strong>"
@@ -212,14 +212,14 @@ class MainWindow(QMainWindow):
             descriptionLayout.addWidget(descriptionLabel)
             taskDescription.setLayout(descriptionLayout)
             self.taskLayout.addWidget(taskDescription, 6)
-        if "sessions" in self.task:
+        if "sessions" in task:
             taskSessions = QWidget()
             sessionLayout = QVBoxLayout()
             sessionLayout.setAlignment(Qt.AlignTop)
             sessionsHeading = QLabel(chr(0xF0ED8) + " " + "<strong>Sessions: </strong>")
             sessionsHeading.setFont(qta.font("fa", 26))
             sessionLayout.addWidget(sessionsHeading)
-            for k, v in self.task["sessions"].items():
+            for k, v in task["sessions"].items():
                 sessionLayout.addWidget(QLabel(v))
             taskSessions.setLayout(sessionLayout)
             self.taskLayout.addWidget(taskSessions, 6)
@@ -229,14 +229,11 @@ class MainWindow(QMainWindow):
             self.taskLayout.addWidget(spacer, 6)
         # Refresh the task info panel layout:
         self.task_panel.setLayout(self.taskLayout)
-        # Make controls for self.task:
-        self.task["key"] = name  # Insert task id key to the task dict
+        # Make controls for this task:
+        task["key"] = task_name  # Insert task id key to the task dict
         # Construct on/off button controls for each board in our task:
-        for board, settings in self.task["boards"].items():
-            widget_config = {"key": board, "board": settings, "task": self.task}
-            # pass our preprocessed button config to each new OnOffWidget
-            # object we add to the layout:
-            self.controlsLayout.addWidget(OnOffWidget(widget_config))
+        for key, board in task["boards"].items():
+            self.controlsLayout.addWidget(OnOffWidget(board, task))
         self.controls.setLayout(self.controlsLayout)
 
     def set_tasks_menu(self):

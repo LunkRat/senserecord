@@ -1,5 +1,6 @@
 import os.path
 import logging
+from typing import Optional
 from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import (
     QWidget,
@@ -25,14 +26,11 @@ from senserecord.core import BoardRecord
 # Custom widget class for Start/Stop record buttons:
 # (Thank you John Lim: https://www.learnpyqt.com/tutorials/widget-search-bar/)
 class OnOffWidget(QWidget):
-    def __init__(self, config: dict):
+    def __init__(self, board: dict, task: dict):
         super(OnOffWidget, self).__init__()
-        self.config = config
+        self.board = board
+        self.task = task
         self.is_on = False  # Current button state (true=ON, false=OFF)
-        if "modelname" in self.config["board"]:
-            self.board_label = self.config["board"]["modelname"]
-        else:
-            self.board_label = self.config["board"]["name"]
         # Construct the record button
         self.recordButton = QPushButton(
             qta.icon("mdi.record-circle-outline", color="#fff"), "Start recording"
@@ -44,12 +42,19 @@ class OnOffWidget(QWidget):
         statusIcon.setIconSize(QSize(42, 42))
         icon_online = qta.icon("mdi.check-network", color="#4CAF50")
         icon_offline = qta.icon("mdi.network-off")
-        if "params" not in self.config["board"]:
-            self.config["board"]["params"] = {}
         # Construct the recorder object with minimum values:
-        self.recorder = BoardRecord(
-            self.config["board"]["name"], self.config["board"]["params"]
-        )
+        try:
+            self.recorder = BoardRecord(
+                board_name=self.board["board_name"],
+                # Pass the 'params' dict as a kwargs mapping:
+                **self.board["params"]
+            )
+        except Exception as e:
+            QMessageBox.critical(
+                self, "Failed to create recorder object: ", str(e), QMessageBox.Ok
+            )
+            logging.exception("Failed to create recorder object.")
+            return
         # Check the board status to see if it is reachable:
         self.is_online = self.recorder.ping()
         if self.is_online:
@@ -68,7 +73,7 @@ class OnOffWidget(QWidget):
         hbox.addWidget(statusLabel, 2.5)
         hbox.addWidget(self.recordButton, 6)
         # Construct a GroupBox to render our hbox layout:
-        groupBox = QGroupBox(self.board_label)
+        groupBox = QGroupBox(self.board["board_name"])
         # Set the GroupBox to render the layout and its widgets:
         groupBox.setLayout(hbox)
         vbox = QVBoxLayout()
@@ -82,8 +87,8 @@ class OnOffWidget(QWidget):
         Called when Start button is clicked.
         Initiates a session with the board and streams data to a file.
         """
-        if "bidsroot" in self.config["task"]:
-            self.bidsroot = self.config["task"]["bidsroot"]
+        if "bidsroot" in self.task:
+            self.bidsroot = self.task["bidsroot"]
         else:
             self.bidsroot = "./"
         # Prompt the user to enter BIDS fields before starting recording:
@@ -97,7 +102,16 @@ class OnOffWidget(QWidget):
         # with a single button for "Finish recording":
         # Start streaming data from the board, save data to an output file:
         try:
-            self.recorder.start(self.bidsroot, self.user_input, self.config)
+            self.recorder.start(
+                bidsroot=self.bidsroot,
+                sub=self.user_input["sub"],
+                ses=self.user_input["ses"],
+                task=self.task["key"],
+                run=self.user_input["run"],
+                data_type=self.board["data_type"],
+                modality=self.board["modality"],
+                acq=self.user_input["acq"],
+            )
         except Exception as e:
             QMessageBox.critical(self, "Recording not started!", str(e), QMessageBox.Ok)
             logging.exception("Failed to start recording! Full stack trace:")
@@ -162,17 +176,8 @@ class InputDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        task = parent.config["task"]
+        task = parent.task
         self.setWindowTitle("Enter data for this recording")
-        # Construct the Task select list input field:
-        self.taskField = QComboBox(self)
-        # Set the task text from .yml config file:
-        if "label" in task:
-            self.taskField.addItem(task["label"], task["key"])
-        else:
-            self.taskField.addItem(task["key"], task["key"])
-        # Disable the field, because a task and a recording share a 1:1 relationship:
-        self.taskField.setDisabled(True)
         # Construct the run input field:
         self.runField = QSpinBox(self)
         self.runField.setPrefix("run-")
@@ -192,20 +197,12 @@ class InputDialog(QDialog):
             self.sessionField.addItem("Default", "defaultsession")
         # Construct the Acq. input field:
         self.acqField = QLineEdit(self)
-        # Construct the modality select list input field:
-        self.modalityField = QComboBox(self)
-        modalities = ["eeg", "ieeg", "meg", "beh"]
-        for option in modalities:
-            self.modalityField.addItem(option)
-        self.modalityField.setCurrentIndex(-1)  # default to blank option
         # Name each field in a dict:
         fields = {
-            "Task": self.taskField,
             "Subject": self.subjectField,
             "Session": self.sessionField,
             "Run": self.runField,
             "Acq": self.acqField,
-            "Modality": self.modalityField,
         }
         # Construct the form layout:
         layout = QFormLayout(self)
@@ -227,12 +224,10 @@ class InputDialog(QDialog):
     def getInputs(self):
         """Gets user input from dialog and returns it in a dict."""
         data = {
-            "task": self.taskField.currentData(),
             "run": self.runField.cleanText(),
             "sub": self.subjectField.cleanText(),
             "ses": self.sessionField.currentData(),
             "acq": self.acqField.text(),
-            "modality": self.modalityField.currentText(),
         }
         return data
 
@@ -245,7 +240,7 @@ class RecordingDialog(QDialog):
 
     def __init__(self, parent):
         super().__init__(parent)
-        task = parent.config["task"]
+        task = parent.task
         user_input = parent.user_input
         self.setWindowTitle("Recording in progress!")
         # Widget to store the grid:
@@ -258,7 +253,7 @@ class RecordingDialog(QDialog):
         gridLayout.addWidget(QLabel(parent.recorder.data_path), 0, 1)
         # # Grid row 1:
         gridLayout.addWidget(QLabel("<b>Recording to file:</b>"), 1, 0)
-        gridLayout.addWidget(QLabel(parent.recorder.data_file), 1, 1)
+        gridLayout.addWidget(QLabel(parent.recorder.data_file_base + ".csv"), 1, 1)
         # # Grid row 2:
         gridLayout.addWidget(QLabel("<b>Task:</b>"), 2, 0)
         if "label" in task:
@@ -296,7 +291,9 @@ class RecordingDialog(QDialog):
         mainLayout.addWidget(grid)
         mainLayout.addWidget(progressBar)
         mainLayout.addWidget(
-            QLabel("<b>Recording to file:</b> " + parent.recorder.data_file)
+            QLabel(
+                "<b>Recording to file:</b> " + parent.recorder.data_file_base + ".csv"
+            )
         )
         mainLayout.addWidget(
             QLabel(
@@ -341,16 +338,17 @@ class BoardInfoWidget(QWidget):
         super().__init__(parent)
         vbox = QVBoxLayout()
         board_manufacturer = ""
-        if "manufacturer" in parent.config["board"]:
-            board_manufacturer = " by " + parent.config["board"]["manufacturer"]
-        vbox.addWidget(QLabel(parent.board_label + board_manufacturer))
+        # if "modelname" in parent.board["metadata"]:
+        #     board_label = parent.board["metadata"]["modelname"]
+        # else:
+        board_label = parent.board["board_name"]
+        # if "manufacturer" in parent.board["metadata"]:
+        #   board_manufacturer = " by " + parent.board["metadata"]["manufacturer"]
+        vbox.addWidget(QLabel(board_label + board_manufacturer))
         vbox.addWidget(QLabel(str(parent.recorder.sample_rate) + " Hz sampling rate"))
         vbox.addWidget(QLabel(str(parent.recorder.channel_count) + " channels"))
-        if (
-            "params" in parent.config["board"]
-            and "serial_port" in parent.config["board"]["params"]
-        ):
-            vbox.addWidget(QLabel(parent.config["board"]["params"]["serial_port"]))
+        if "params" in parent.board and "serial_port" in parent.board["params"]:
+            vbox.addWidget(QLabel(parent.board["params"]["serial_port"]))
         self.setLayout(vbox)
         self.setStyleSheet(
             """
