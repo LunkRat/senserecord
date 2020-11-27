@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import QApplication
 import uvicorn
 from senserecord.cli import cli
 from senserecord.gui import MainWindow
-from senserecord.restapi import app as api
+from senserecord.http import app as web
 
 
 def console():
@@ -42,9 +42,9 @@ def gui():
     sys.exit(app.exec_())
 
 
-def restapi():
+def http():
     """
-    Runs the rest api endpoint on localhost.
+    Runs the REST API http endpoint on localhost.
     """
     # See:
     # https://www.uvicorn.org/deployment/
@@ -55,7 +55,7 @@ def restapi():
     typer.launch("http://127.0.0.1:8000/docs")
 
     uvicorn.run(
-        "senserecord.main:api",
+        "senserecord.main:web",
         host="127.0.0.1",
         port=8000,
         reload=True,  # For development

@@ -20,7 +20,7 @@ classifiers = [
 [tool.poetry.scripts]
 senserecord = "senserecord.main:console"
 senserecord-gui = "senserecord.main:gui"
-senserecord-api = "senserecord.main:restapi"
+senserecord-http = "senserecord.main:http"
 
 
 [tool.poetry.dependencies]

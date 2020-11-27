@@ -3,7 +3,6 @@ import json
 from typing import Optional
 import typer
 from senserecord.core import BoardRecord, valid_boardname
-from senserecord.restapi import ResultJson
 
 cli = typer.Typer()
 
