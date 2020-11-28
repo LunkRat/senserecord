@@ -169,8 +169,6 @@ def start(
             data_type=data_type,
             modality=modality,
             acq=acq,
-            # passing empty dict; feature is in dev
-            metadata={},
         )
     except Exception as e:
         result.body["status"] = "error"
