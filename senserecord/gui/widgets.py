@@ -197,18 +197,12 @@ class InputDialog(QDialog):
             self.sessionField.addItem("Default", "defaultsession")
         # Construct the Acq. input field:
         self.acqField = QLineEdit(self)
-        # Name each field in a dict:
-        fields = {
-            "Subject": self.subjectField,
-            "Session": self.sessionField,
-            "Run": self.runField,
-            "Acq": self.acqField,
-        }
         # Construct the form layout:
         layout = QFormLayout(self)
-        # Add all of the input fields to the form layout:
-        for name, widget in fields.items():
-            layout.addRow(name, widget)
+        layout.addRow("Subject", self.subjectField)
+        layout.addRow("Session", self.sessionField)
+        layout.addRow("Run", self.runField)
+        layout.addRow("Acq", self.acqField)
         startButton = QPushButton("Start recording")
         startButton.setStyleSheet("background-color: #4CAF50; color: #fff;")
         startButton.setIcon(qta.icon("mdi.play-circle-outline", color="#fff"))
