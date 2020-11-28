@@ -2,6 +2,7 @@ import argparse
 import logging
 import sys
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -17,7 +18,6 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
 )
 import qtawesome as qta
-from pyshortcuts import make_shortcut
 from senserecord.gui.widgets import OnOffWidget, BoardInfoWidget, QTextEditLogger
 from senserecord.core import process_yaml
 
@@ -122,6 +122,9 @@ class MainWindow(QMainWindow):
         self.setMinimumWidth(1000)
         # Window title:
         self.setWindowTitle("Sense Record")
+        self.setWindowIcon(
+            QIcon(qta.icon("mdi.circle-slice-8", options=[{"color": "#4CAF50"}]))
+        )
         # Construct status bar (bottom of MainWindow):
         self.statusBar()
         # Construct Menu bar on MainWindow:
