@@ -16,22 +16,49 @@ def callback():
 
 
 @cli.command()
-def status(board: str):
+def status(
+    board_name: str,
+    serial_port: Optional[str] = "",
+    mac_address: Optional[str] = "",
+    ip_address: Optional[str] = "",
+    ip_port: Optional[int] = 0,
+    ip_protocol: Optional[int] = 0,
+    other_info: Optional[str] = "",
+    timeout: Optional[int] = 0,
+    serial_number: Optional[str] = "",
+    board_file: Optional[str] = "",
+):
     """Returns the current status of a given board name."""
-    board_params = {}
-    if not valid_boardname(board):
-        typer.secho(f"Boardname {board} is unknown", fg=typer.colors.RED)
-    # create a recorder, ping it, get its status, then delete it:
-    recorder = BoardRecord(board, board_params)
-    recorder.ping()
-    if recorder.is_ready and not recorder.is_recording:
-        typer.secho(f"{board} is ready", fg=typer.colors.GREEN)
-    del recorder
+    if not valid_boardname(board_name):
+        typer.secho(f"Boardname {board_name} is unknown", fg=typer.colors.RED)
+    else:
+        try:
+            recorder = BoardRecord(
+                board_name=board_name,
+                serial_port=serial_port,
+                mac_address=mac_address,
+                ip_address=ip_address,
+                ip_port=ip_port,
+                ip_protocol=ip_protocol,
+                other_info=other_info,
+                timeout=timeout,
+                serial_number=serial_number,
+                board_file=board_file,
+            )
+        except Exception as e:
+            typer.secho(
+                f"Failed to check status of {board_name} \n" + str(e),
+                fg=typer.colors.RED,
+            )
+        recorder.ping()
+        if recorder.is_ready and not recorder.is_recording:
+            typer.secho(f"{board_name} is ready", fg=typer.colors.GREEN)
+        del recorder
 
 
 @cli.command()
 def start(
-    board: str = typer.Option(..., prompt="Enter your board name"),
+    board_name: str = typer.Option(..., prompt="Enter your board name"),
     bidsroot: str = typer.Option(
         ..., prompt="Enter the path to the root directory of your project"
     ),
@@ -39,7 +66,16 @@ def start(
     ses: str = typer.Option(..., prompt="Session name"),
     task: str = typer.Option(..., prompt="Task name"),
     run: str = typer.Option(..., prompt="Run number"),
-    data_type: Optional[str] = None,
+    data_type: str = typer.Option(..., prompt="Data type. Choices: eeg, ecg,"),
+    serial_port: Optional[str] = "",
+    mac_address: Optional[str] = "",
+    ip_address: Optional[str] = "",
+    ip_port: Optional[int] = 0,
+    ip_protocol: Optional[int] = 0,
+    other_info: Optional[str] = "",
+    timeout: Optional[int] = 0,
+    serial_number: Optional[str] = "",
+    board_file: Optional[str] = "",
     modality: Optional[str] = None,
     acq: Optional[str] = None,
 ):
@@ -49,29 +85,35 @@ def start(
     """
     # No architecture for accepting params or metadata,
     # so pass empty dicts for now as placeholders:
-    metadata = {"task": {"board": {}}}
-    board_params = {}
-    if not valid_boardname(board):
-        typer.secho(f"Boardname {board} is unknown", fg=typer.colors.RED)
+    if not valid_boardname(board_name):
+        typer.secho(f"Boardname {board_name} is unknown", fg=typer.colors.RED)
         raise typer.Exit(code=1)
-    recorder = BoardRecord(board, board_params)
-    user_input = {
-        "task": task,
-        "run": run,
-        "sub": sub,
-        "ses": ses,
-    }
-    if bool(data_type):
-        user_input["type"] = data_type
-    if bool(acq):
-        user_input["acq"] = acq
-    if bool(modality):
-        user_input["modality"] = modality
     try:
-        recorder.start(bidsroot, user_input, metadata)
+        recorder = BoardRecord(
+            board_name=board_name,
+            serial_port=serial_port,
+            mac_address=mac_address,
+            ip_address=ip_address,
+            ip_port=ip_port,
+            ip_protocol=ip_protocol,
+            other_info=other_info,
+            timeout=timeout,
+            serial_number=serial_number,
+            board_file=board_file,
+        )
+        recorder.start(
+            bidsroot=bidsroot,
+            sub=sub,
+            ses=ses,
+            task=task,
+            run=run,
+            data_type=data_type,
+            modality=modality,
+            acq=acq,
+        )
         recorder.ping()
         if recorder.is_recording:
-            typer.secho(f"Now recording from {board}", fg=typer.colors.GREEN)
+            typer.secho(f"Now recording from {board_name}", fg=typer.colors.GREEN)
             while True:
                 finished = typer.confirm("Stop the recording?")
                 if finished:
@@ -88,8 +130,8 @@ def start(
                             + str(e),
                             fg=typer.colors.RED,
                         )
-
     except Exception as e:
         typer.secho(
-            f"Failed to start recording from {board} \n" + str(e), fg=typer.colors.RED
+            f"Failed to start recording from {board_name} \n" + str(e),
+            fg=typer.colors.RED,
         )
