@@ -10,7 +10,7 @@ cli = typer.Typer()
 @cli.callback()
 def callback():
     """
-    Sense Record CLI
+    Sense Record CLI\n
     Record data streams from biosensor hardware.
     """
 
