@@ -55,8 +55,45 @@ The API offers built-in html docs, which are interactive so you can actually con
 
 ### Example usage of the rest API:
 
+Simply visit this example URL and it will start recording from `SYNTHETIC_BOARD`:
 ```
 http://127.0.0.1:8000/start/SYNTHETIC_BOARD?bidsroot=%2Fhome%2Flink%2FDownloads&serial_port=%2Fdev%2FttyUSB0&ip_port=0&ip_protocol=0&timeout=0&sub=001&ses=default&task=default&run=001&data_type=eeg&modality=eeg
+```
+This returns a simple JSON response:
+
+```json
+{
+  "status": "ok",
+  "result": {
+    "board": {
+      "name": "SYNTHETIC_BOARD",
+      "is_ready": false,
+      "is_recording": true
+    }
+  },
+  "details": []
+```
+
+Don't forget to stop the recording! You can do that by visiting this URL:
+
+```
+http://127.0.0.1:8000/stop/SYNTHETIC_BOARD
+```
+
+Which returns this JSON response:
+
+```json
+{
+  "status": "ok",
+  "result": {
+    "board": {
+      "name": "SYNTHETIC_BOARD",
+      "is_ready": true,
+      "is_recording": false
+    }
+  },
+  "details": []
+}
 ```
 
 ## License
