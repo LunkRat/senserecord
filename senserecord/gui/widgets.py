@@ -144,6 +144,14 @@ class OnOffWidget(QWidget):
             # Switch the button to OFF state:
             self.is_on = False
             self.update_button_state()
+            QMessageBox.information(self, "Recording saved!",
+                "<b>Data saved to:</b> \n" 
+                + self.recorder.data_file_base 
+                + ".csv"
+                + "\n <b>Located at:</b> \n"
+                + self.recorder.data_path, 
+                QMessageBox.Ok
+            )
         except Exception:
             logging.exception("Failed to stop stream! Full stack trace:")
 
