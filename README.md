@@ -19,6 +19,7 @@ pip install senserecord
 
 Sense Record provides three ways to interact with biosensor data: a GUI desktop app, a command-line interface, and a REST web services API.
 
+
 ### GUI Application
 
 1. Use the example configuration files in `/examples` to get started.
@@ -31,11 +32,32 @@ Sense Record provides three ways to interact with biosensor data: a GUI desktop 
 
 ### CLI Application
 
-Forthcoming.
+Sense Record comes with an interactive command-line interface. You can start the CLI with:
+
+```bash
+senserecord
+```
+Run it with no arguments and you get the help text.
+
+CLI demo forthcoming. 
 
 ### REST Web Services API
 
-Forthcoming.
+You can control recordings remotely using the built-in REST web services API. Start the REST server with:
+
+```bash
+senserecord-http
+```
+
+It will launch the server process try to open the http endpoint in your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+The API offers built-in html docs, which are interactive so you can actually control your recordings in your browser right from the HTML docs!
+
+### Example usage of the rest API:
+
+```
+http://127.0.0.1:8000/start/SYNTHETIC_BOARD?bidsroot=%2Fhome%2Flink%2FDownloads&serial_port=%2Fdev%2FttyUSB0&ip_port=0&ip_protocol=0&timeout=0&sub=001&ses=default&task=default&run=001&data_type=eeg&modality=eeg
+```
 
 ## License
 GPL-3.0-or-later
