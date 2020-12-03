@@ -34,64 +34,9 @@ class MainWindow(QMainWindow):
             required=False,
             default="",
         )
-        parser.add_argument(
-            "--task",
-            type=str,
-            help="Name for the task that the subject performs while connected to the biosensor",
-            required=False,
-            default="",
-        )
-        parser.add_argument(
-            "--board",
-            type=str,
-            help="Board name of a BrainFlow supported board",
-            required=False,
-            default="",
-        )
-        parser.add_argument(
-            "--serial-port",
-            type=str,
-            help="local serial port to use when communicating with the board",
-            required=False,
-            default="",
-        )
         args = parser.parse_args()
-
         if args.config:
             self.config_file = args.config
-        if args.task and args.config:
-            parser.error(
-                "--task cannot be combined with --config. Instead, specify your task in your config file."
-            )
-        if args.task and not args.board:
-            parser.error("--task requires that you also specify --board")
-        # if args.board and not args.serial_port:
-        #     parser.error('--board requires that you also specify --serial-port')
-        if args.serial_port and not args.board:
-            parser.error("--serial-port requires that you also specify --board")
-        if args.task:
-            taskname = args.task
-        else:
-            # Set task to 'default' if none given:
-            taskname = "default"
-        if args.board:
-            # If a board name was given as a cli argument,
-            # set bare minimum config from cli arguments:
-            self.config = {
-                "tasks": {
-                    taskname: {
-                        "boards": {
-                            args.board: {
-                                "board_name": args.board,
-                            }
-                        }
-                    }
-                }
-            }
-        if args.serial_port:
-            self.config["tasks"][taskname]["boards"][args.board]["params"] = {
-                "serial_port": args.serial_port
-            }
         # Logger box:
         logTextBox = QTextEditLogger(self)
         logTextBox.setFormatter(
@@ -143,7 +88,7 @@ class MainWindow(QMainWindow):
         self.viewMenu = menubar.addMenu("&View")
         self.refreshAct = QAction(qta.icon("mdi.refresh"), "Refresh", self)
         self.refreshAct.setStatusTip(
-            "Refresh the task into and board status in the controls."
+            "Refresh the controls."
         )
         self.refreshAct.triggered.connect(self.load_config)
         self.refreshAct.setDisabled(True)
@@ -152,7 +97,7 @@ class MainWindow(QMainWindow):
         self.toolbar = QToolBar("Main toolbar")
         self.addToolBar(self.toolbar)
         # Load configuration if present
-        if hasattr(self, "config_file") or args.board:
+        if hasattr(self, "config_file"):
             self.load_config()
         else:
             # Config file button and file dialog.
@@ -193,7 +138,7 @@ class MainWindow(QMainWindow):
         toolbarSpacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         refreshButton = QAction(qta.icon("mdi.refresh"), "Refresh", self)
         refreshButton.setStatusTip(
-            "Refresh the task into and board status in the controls."
+            "Refresh the controls."
         )
         refreshButton.triggered.connect(self.load_config)
         self.toolbar.addWidget(toolbarSpacer)
