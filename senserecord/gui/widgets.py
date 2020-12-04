@@ -29,6 +29,8 @@ class OnOffWidget(QWidget):
     def __init__(self, board: dict, task: dict):
         super(OnOffWidget, self).__init__()
         self.board = board
+        if 'params' not in self.board:
+            self.board['params'] = {}
         self.task = task
         self.is_on = False  # Current button state (true=ON, false=OFF)
         # Construct the record button
@@ -91,6 +93,10 @@ class OnOffWidget(QWidget):
             self.bidsroot = self.task["bidsroot"]
         else:
             self.bidsroot = "./"
+        if 'data_type' not in self.board:
+            self.board['data_type'] = ''
+        if 'modality' not in self.board:
+            self.board['modality'] = ''
         # Prompt the user to enter BIDS fields before starting recording:
         user_input_dialog = InputDialog(self)
         if user_input_dialog.exec():

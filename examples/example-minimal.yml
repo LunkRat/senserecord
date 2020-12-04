@@ -7,7 +7,3 @@ tasks:
         boards:
             synthetic_board:
                 board_name: 'SYNTHETIC_BOARD'
-                data_type: 'eeg'
-                modality: 'eeg'
-                params:
-                    serial_port: '/dev/ttyUSB0'
