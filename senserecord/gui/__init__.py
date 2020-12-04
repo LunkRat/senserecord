@@ -87,9 +87,7 @@ class MainWindow(QMainWindow):
         # View menu
         self.viewMenu = menubar.addMenu("&View")
         self.refreshAct = QAction(qta.icon("mdi.refresh"), "Refresh", self)
-        self.refreshAct.setStatusTip(
-            "Refresh the controls."
-        )
+        self.refreshAct.setStatusTip("Refresh the controls.")
         self.refreshAct.triggered.connect(self.load_config)
         self.refreshAct.setDisabled(True)
         self.viewMenu.addAction(self.refreshAct)
@@ -137,9 +135,7 @@ class MainWindow(QMainWindow):
         toolbarSpacer = QWidget(self)  # right-aligns the refresh button
         toolbarSpacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         refreshButton = QAction(qta.icon("mdi.refresh"), "Refresh", self)
-        refreshButton.setStatusTip(
-            "Refresh the controls."
-        )
+        refreshButton.setStatusTip("Refresh the controls.")
         refreshButton.triggered.connect(self.load_config)
         self.toolbar.addWidget(toolbarSpacer)
         self.toolbar.addAction(refreshButton)
