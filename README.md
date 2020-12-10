@@ -28,7 +28,7 @@ Sense Record is pre-alpha, in development, unstable. Use accordingly, at your ow
 | Callibri         | `CALLIBRI_ECG_BOARD`     |
 | MIT              | `FASCIA_BOARD`           |
 | Neurosity        | `NOTION_OSC_BOARD`       |
-|                  | `IRONBCI_BOARD`          |
+| I_Ron-BCI        | `IRONBCI_BOARD`          |
 | Crowd Supply     | `FREEEEG32_BOARD`        |
 
 ## Installation
