@@ -2,11 +2,9 @@
 
 A cross-platform application for saving data streams from biosensor hardware using the [BrainFlow Python API](https://brainflow.readthedocs.io/en/stable/UserAPI.html#python-api-reference).
 
-Sense Record aims to provide simple GUI, CLI, and REST API interfaces allowing the user to easily control (start/stop) a file stream on any BrainFlow-supported board. It is designed for a research lab setting, where the user (experimenter, study staff) needs to ensure that the raw file stream is being saved and that the file is saved along with information about the experimental session/task/run/participant.
+Sense Record is designed for a research lab setting, where the user (experimenter, study staff) needs to ensure that the raw file stream is being saved and that the file is saved along with information about the experimental session/task/run/participant.
 
 Sense Record saves biosensor recordings using file naming conventions compliant with the [Brain Imaging Data Structure (BIDS)](https://bids-specification.readthedocs.io/en/stable/). The user is prompted to enter the subject/participant, session, task, and run information before starting any recording. This data is then used by Sense Record to generate the output file name and sub directory names, along with BIDS-spec metadata files that it saves with each recording.
-
-Sense Record reads a configuration file in YAML format, in which you can define the information about your experiment, hardware settings for connecting to the board(s), and metadata to use when saving the file streams associated with your experiment. This allows the experimenter to maintain Sense Record's configuration in version-controlled text files to ensure a known configuration of Sense Record when deployed on computers for use in live experimental sessions.
 
 ## Installation
 
@@ -34,6 +32,8 @@ Learn more about each of these interfaces in the sections below.
 ### GUI Desktop Application
 
 The GUI provides controls for starting and stopping recordings. It prompts you for run information (BIDS fields) at the start of each recording run.
+
+![Screenshot](screenshot.png)
 
 1. Launch the GUI by running the command: `senserecord-gui`
 2. In the menu bar, select **File > Load configuration file** and load your `.yml` file. Use the example configuration files in [`/examples`](examples) to create your config file.
