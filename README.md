@@ -6,6 +6,29 @@ Sense Record is designed for a research lab setting, where the user (experimente
 
 Sense Record saves biosensor recordings using file naming conventions compliant with the [Brain Imaging Data Structure (BIDS)](https://bids-specification.readthedocs.io/en/stable/). The user is prompted to enter the subject/participant, session, task, and run information before starting any recording. This data is then used by Sense Record to generate the output file name and sub directory names, along with BIDS-spec metadata files that it saves with each recording.
 
+## Supported hardware
+
+| Manufacturer     | Senserecord config name  |
+|------------------|--------------------------|
+| OpenBCI          | `CYTON_BOARD`            |
+| OpenBCI          | `GANGLION_BOARD`         |
+| OpenBCI          | `CYTON_DAISY_BOARD`      |
+| OpenBCI          | `GALEA_BOARD`            |
+| OpenBCI          | `GANGLION_WIFI_BOARD`    |
+| OpenBCI          | `CYTON_WIFI_BOARD`       |
+| OpenBCI          | `CYTON_DAISY_WIFI_BOARD` |
+| Brainbit         | `BRAINBIT_BOARD`         |
+| g.tec            | `UNICORN_BOARD`          |
+| Callibri         | `CALLIBRI_EEG_BOARD`     |
+| Callibri         | `CALLIBRI_EMG_BOARD`     |
+| Callibri         | `CALLIBRI_ECG_BOARD`     |
+| Fluid Interfaces | `FASCIA_BOARD`           |
+| Neurosity        | `NOTION_OSC_BOARD`       |
+| Neurosity        | `NOTION_1_BOARD`         |
+| Neurosity        | `NOTION_2_BOARD`         |
+|                  | `IRONBCI_BOARD`          |
+| Crowd Supply     | `FREEEEG32_BOARD`        |
+
 ## Installation
 
 Invoke `pip` as appropriate in your environment to do:
