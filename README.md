@@ -1,7 +1,8 @@
 # Sense Record
+
 A cross-platform application for saving data streams from biosensor hardware using the [BrainFlow Python API](https://brainflow.readthedocs.io/en/stable/UserAPI.html#python-api-reference).
 
-Sense Record aims to provide simple CLI, GUI, and REST API interfaces allowing the user to easily control (start/stop) a file stream on any BrainFlow-supported board. It is designed for a research lab setting, where the user (experimenter, study staff) needs to ensure that the raw file stream is being saved and that the file is saved along with information about the experimental session/task/run/participant.
+Sense Record aims to provide simple GUI, CLI, and REST API interfaces allowing the user to easily control (start/stop) a file stream on any BrainFlow-supported board. It is designed for a research lab setting, where the user (experimenter, study staff) needs to ensure that the raw file stream is being saved and that the file is saved along with information about the experimental session/task/run/participant.
 
 Sense Record saves biosensor recordings using file naming conventions compliant with the [Brain Imaging Data Structure (BIDS)](https://bids-specification.readthedocs.io/en/stable/). The user is prompted to enter the subject/participant, session, task, and run information before starting any recording. This data is then used by Sense Record to generate the output file name and sub directory names, along with BIDS-spec metadata files that it saves with each recording.
 
@@ -17,14 +18,25 @@ pip install senserecord
 
 ## Usage
 
-Sense Record provides three types of interfaces for recording biosensor data: a GUI desktop app, a command-line interface, and a REST web services API.
+Sense Record provides three types of interfaces for recording biosensor data with BrainFlow: a GUI desktop app, a command-line interface, and a REST web services API.
+
+To launch the GUI desktop app:  
+`senserecord-gui`
+
+To launch the CLI console app:  
+`senserecord`
+
+To launch the local http server and web app with REST API:  
+`senserecord-http`
+
+Learn more about each of these interfaces in the sections below.
 
 ### GUI Desktop Application
 
 The GUI provides controls for starting and stopping recordings. It prompts you for run information (BIDS fields) at the start of each recording run.
 
 1. Launch the GUI by running the command: `senserecord-gui`
-2. In the menu bar, select **File > Load configuration file** and load your `.yml` file. Use the example configuration files in `/examples` to create your config file.
+2. In the menu bar, select **File > Load configuration file** and load your `.yml` file. Use the example configuration files in [`/examples`](examples) to create your config file.
 3. Press the "Start Recording" button. A dialog will appear, prompting you to enter information (BIDS fields) about your recording.
 4. Record until your task/run is finished.
 5. Press the "Stop Recording" button.
@@ -32,12 +44,9 @@ The GUI provides controls for starting and stopping recordings. It prompts you f
 
 ### CLI Application
 
-Sense Record comes with an interactive command-line interface. You can start the CLI with:
+Sense Record comes with an interactive command-line interface.
 
-```bash
-senserecord
-```
-Run it with no arguments and it shows you help text.
+Type `senserecord` with no arguments and it shows you help text.
 
 Type `senserecord start` with no arguments and you are prompted for input, like this:
 
@@ -57,7 +66,7 @@ Stopped recording from SYNTHETIC_BOARD
 
 This example run created a test directory `sourcedata/sub-001/ses-testSession/eeg` with a data file inside named `sub-001_ses-testSession_task-myExperiment_run-001_eeg.csv`.
 
-You can provide arguments to bypass the prompts, like this example:
+You can also bypass the prompts with command-line arguments, like this example:
 
 ```bash
 :$ senserecord start --board-name SYNTHETIC_BOARD --serial-port /dev/ttyUSB0 --bidsroot /home/myuser/my_experiment_dir --sub 001 --ses mySession --task myTask --run 001 --data-type eeg
@@ -73,14 +82,18 @@ You can control recordings over http using the built-in REST web services API. S
 senserecord-http
 ```
 
-It will launch the server process try to open the http endpoint in your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000). If you visit that URL in your browser, you get interactive HTML documentation that allows you to start and stop recordings from your browser.
+This will launch the server process and try to open the http endpoint in your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000). Visit that URL and you get interactive HTML documentation that allows you to start and stop recordings from your browser. You can also use it to build URLs like the one used in the example below.
 
-### Example usage of the rest API
+### Example usage of the REST API
 
-Simply visit this example URL and it will start recording from `SYNTHETIC_BOARD`:
+Recordings can be started with a GET request, with parameters in the query string of the URL.
+
+Visit this example URL and it will start recording from `SYNTHETIC_BOARD`:
+
 ```
 http://127.0.0.1:8000/start/SYNTHETIC_BOARD?bidsroot=%2Fhome%2Flink%2FDownloads&serial_port=%2Fdev%2FttyUSB0&sub=001&ses=default&task=default&run=001&data_type=eeg&modality=eeg
 ```
+
 It returns a simple JSON response that looks something like this:
 
 ```json
@@ -102,7 +115,7 @@ Don't forget to stop the recording! You can do that by visiting this URL:
 http://127.0.0.1:8000/stop/SYNTHETIC_BOARD
 ```
 
-When the recording stops, the API returns this JSON response:
+When the recording stops, the API returns this JSON response smth like:
 
 ```json
 {
@@ -124,4 +137,4 @@ GPL-3.0-or-later
 
 ## Contact
 
-Link Swanson (link@umn.edu)
+Link Swanson (link@swanson.link)
