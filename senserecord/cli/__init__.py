@@ -66,7 +66,7 @@ def start(
     ses: str = typer.Option(..., prompt="Session name"),
     task: str = typer.Option(..., prompt="Task name"),
     run: str = typer.Option(..., prompt="Run number"),
-    data_type: str = typer.Option(..., prompt="Data type. Choices: eeg, ecg,"),
+    data_type: str = typer.Option(..., prompt="Data type. Choices: eeg, emg, ecg, eog"),
     serial_port: Optional[str] = "",
     mac_address: Optional[str] = "",
     ip_address: Optional[str] = "",
