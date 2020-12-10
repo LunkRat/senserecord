@@ -6,6 +6,10 @@ Sense Record is designed for a research lab setting, where the user (experimente
 
 Sense Record saves biosensor recordings using file naming conventions compliant with the [Brain Imaging Data Structure (BIDS)](https://bids-specification.readthedocs.io/en/stable/). The user is prompted to enter the subject/participant, session, task, and run information before starting any recording. This data is then used by Sense Record to generate the output file name and sub directory names, along with BIDS-spec metadata files that it saves with each recording.
 
+## Status
+
+Sense Record is pre-alpha, in development, unstable. Use accordingly, at your own risk.
+
 ## Supported hardware
 
 | Manufacturer     | Senserecord config name  |
