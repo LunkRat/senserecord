@@ -1,0 +1,37 @@
+tasks:
+  example_visual_task:
+    label: 'Example visual task'
+    description: >
+      Participants view visual stimuli that vary in contrast, 
+      orientation, and positioning with each trial.
+    instructions: >
+      Your task is to fixate on the center mark, compare the appearance 
+      of the two images on either side of the screen, and press the right 
+      or left arrow key to indicate the image you like best.
+    institution: 'University Psychophysica'
+    bidsroot: './'
+    sessions:
+      week1: 'Week 1 visit'
+      week2: 'Week 2 visit'
+      week3: 'Week 3 visit'
+      followup: 'Follow-up visit'
+    boards:
+      synthetic:
+        board_name: 'SYNTHETIC_BOARD'
+        data_type: 'eeg'
+        modality: 'eeg'
+        params:
+          serial_port: '/dev/ttyUSB0' # type: str
+          mac_address: ''
+          ip_address: '' # type: string
+          ip_port: 0 # type: integer
+          ip_protocol: 0 # type: integer
+          other_info: '' # type: string
+          serial_number: '' # type: string
+          timeout: 0 # type: integer
+          board_file: ''
+        metadata:
+          manufacturer: 'BrainFlow'
+          modelname: 'Synthetic'
+          capmanufacturer: 'BrainFlow'
+          capmodelname: 'Synthetic Cap'

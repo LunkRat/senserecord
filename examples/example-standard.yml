@@ -1,0 +1,19 @@
+tasks:
+  # Name your experiment in this root key:
+  my_experiment:
+    # Nice label for experiment:
+    label: 'My experiment with EEG recording'
+    # Path to output directory:
+    bidsroot: './'
+    boards:
+      # Define your board:
+      synthetic_board:
+        board_name: 'SYNTHETIC_BOARD'
+        data_type: 'eeg'
+  my_other_experiment:
+    label: 'My other additional experiment with EEG recording'
+    bidsroot: './'
+    boards:
+      synthetic_board:
+        board_name: 'SYNTHETIC_BOARD'
+        data_type: 'eeg'

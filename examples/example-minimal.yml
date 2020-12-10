@@ -5,11 +5,11 @@
 # This is a minimal example needed to get a board visible in the GUI and record data from it.
 
 tasks:
-    # Name your experiment in this root key:
-    my_experiment:
-        # Path to output directory:
-        bidsroot: './'
-        boards:
-            # Define your board:
-            synthetic_board:
-                board_name: 'SYNTHETIC_BOARD'
+  # Name your experiment in this root key:
+  my_experiment:
+    # Path to output directory:
+    bidsroot: './'
+    boards:
+      # Define your board:
+      synthetic_board:
+          board_name: 'SYNTHETIC_BOARD'
