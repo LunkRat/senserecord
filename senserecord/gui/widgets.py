@@ -196,10 +196,12 @@ class InputDialog(QDialog):
         self.setWindowTitle("Enter data for this recording")
         # Construct the run input field:
         self.runField = QSpinBox(self)
-        self.runField.setPrefix("run-")
+        self.runField.setValue(1)
+        self.runField.setMaximum(999)
         # Construct the subject input field:
         self.subjectField = QSpinBox(self)
-        self.subjectField.setPrefix("sub-")
+        self.subjectField.setValue(1)
+        self.subjectField.setMaximum(999)
         # Construct the session input field:
         self.sessionField = QComboBox(self)
         # Add dropdown options using sessions key in config, if present:

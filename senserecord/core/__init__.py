@@ -97,10 +97,10 @@ class BoardRecord(object):
             raise FileSystemException(
                 f"Non-existent base directory path specified in config. Check config or create the directory: {self.bidsroot}"
             )
-        self.sub = sub
+        self.sub = sub.zfill(3)
         self.ses = ses
         self.task = task
-        self.run = run
+        self.run = run.zfill(3)
         self.data_type = data_type
         self.modality = modality
         self.acq = acq
