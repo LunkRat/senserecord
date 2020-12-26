@@ -59,8 +59,8 @@ class MainWindow(QMainWindow):
         containerLayout = QVBoxLayout()
         containerLayout.addWidget(self.task_panel)
         containerLayout.addWidget(self.controls)
-        containerLayout.addWidget(loglabel)
-        containerLayout.addWidget(logTextBox.widget)
+        # containerLayout.addWidget(loglabel)
+        # containerLayout.addWidget(logTextBox.widget)
         container.setLayout(containerLayout)
         self.setCentralWidget(container)
         # Set initial window width:
