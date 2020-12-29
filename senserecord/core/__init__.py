@@ -157,8 +157,7 @@ class BoardRecord(object):
             else:
                 self.modality = "eeg"
         # Construct the path to the recording output directory:
-        self.data_path = os.path.join(
-            self.bidsroot,
+        self.data_relative_path = os.path.join(
             # we are recording raw csv,
             # so we output to ./sourcedata
             "sourcedata",
@@ -167,6 +166,7 @@ class BoardRecord(object):
             self.data_type,
             "",  # trailing slash
         )
+        self.data_path = os.path.join(self.bidsroot, self.data_relative_path)
         # Ensure the recording output directory exists:
         Path(self.data_path).mkdir(parents=True, exist_ok=True)
         # Construct the name of the recording output file
@@ -189,9 +189,7 @@ class BoardRecord(object):
             raise FileSystemException(
                 f"A file already exists at {self.data_path + self.data_file_base + '.csv'}.\n\nYou must either delete the file from its current location, or enter different information when starting the recording."
             )
-        self.file_param = (
-            "file://" + self.data_path + self.data_file_base + ".csv:w"
-        )
+        self.file_param = "file://" + self.data_path + self.data_file_base + ".csv:w"
 
     def write_sidecar(self):
         """Generates metadata and writes it to a BIDS json sidecar file."""

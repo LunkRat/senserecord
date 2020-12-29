@@ -29,8 +29,8 @@ class OnOffWidget(QWidget):
     def __init__(self, board: dict, task: dict):
         super(OnOffWidget, self).__init__()
         self.board = board
-        if 'params' not in self.board:
-            self.board['params'] = {}
+        if "params" not in self.board:
+            self.board["params"] = {}
         self.task = task
         self.is_on = False  # Current button state (true=ON, false=OFF)
         # Construct the record button
@@ -49,7 +49,7 @@ class OnOffWidget(QWidget):
             self.recorder = BoardRecord(
                 board_name=self.board["board_name"],
                 # Pass the 'params' dict as a kwargs mapping:
-                **self.board["params"]
+                **self.board["params"],
             )
         except Exception as e:
             QMessageBox.critical(
@@ -93,10 +93,10 @@ class OnOffWidget(QWidget):
             self.bidsroot = self.task["bidsroot"]
         else:
             self.bidsroot = "./"
-        if 'data_type' not in self.board:
-            self.board['data_type'] = ''
-        if 'modality' not in self.board:
-            self.board['modality'] = ''
+        if "data_type" not in self.board:
+            self.board["data_type"] = ""
+        if "modality" not in self.board:
+            self.board["modality"] = ""
         # Prompt the user to enter BIDS fields before starting recording:
         user_input_dialog = InputDialog(self)
         if user_input_dialog.exec():
@@ -153,11 +153,9 @@ class OnOffWidget(QWidget):
             QMessageBox.information(
                 self,
                 "Recording saved!",
-                "<b>Data saved to:</b> \n"
-                + self.recorder.data_file_base
-                + ".csv"
-                + "\n <b>Located at:</b> \n"
-                + self.recorder.data_path,
+                "<b>Data saved to:</b> <br>"
+                + self.recorder.data_relative_path
+                + f'<br><a href="file:///{os.path.abspath(self.recorder.data_relative_path)}">Open folder</a>',
                 QMessageBox.Ok,
             )
         except Exception:
@@ -255,38 +253,7 @@ class RecordingDialog(QDialog):
         task = parent.task
         user_input = parent.user_input
         self.setWindowTitle("Recording in progress!")
-        # Widget to store the grid:
-        grid = QWidget()
-        # Construct the layout:
-        gridLayout = QGridLayout()
-        # # Add field widgets to the layout:
-        # # Grid row 0:
-        gridLayout.addWidget(QLabel("<b>Output directory:</b>"), 0, 0)
-        gridLayout.addWidget(QLabel(parent.recorder.data_path), 0, 1)
-        # # Grid row 1:
-        gridLayout.addWidget(QLabel("<b>Recording to file:</b>"), 1, 0)
-        gridLayout.addWidget(QLabel(parent.recorder.data_file_base + ".csv"), 1, 1)
-        # # Grid row 2:
-        gridLayout.addWidget(QLabel("<b>Task:</b>"), 2, 0)
-        if "label" in task:
-            name = task["label"]
-        else:
-            name = task["key"]
-        gridLayout.addWidget(QLabel(name), 2, 1)
-        # # Grid row 3:
-        gridLayout.addWidget(QLabel("<b>Subject:</b>"), 3, 0)
-        gridLayout.addWidget(QLabel(user_input["sub"]), 3, 1)
-        # # Grid row 4:
-        gridLayout.addWidget(QLabel("<b>Session:</b>"), 4, 0)
-        gridLayout.addWidget(QLabel(user_input["ses"]), 4, 1)
-        # # Grid row 5:
-        gridLayout.addWidget(QLabel("<b>Run</b>:"), 5, 0)
-        gridLayout.addWidget(QLabel(user_input["run"]), 5, 1)
-        # # Grid row 6:
-        if "acq" in user_input and user_input["acq"] != "":
-            gridLayout.addWidget(QLabel("<b>Acq:</b>"), 6, 0)
-            gridLayout.addWidget(QLabel(user_input["acq"]), 6, 1)
-        grid.setLayout(gridLayout)
+
         # Construct the progress bar:
         progressBar = QProgressBar(self)
         # Make the progress bar show as a 'busy' bar
@@ -300,19 +267,18 @@ class RecordingDialog(QDialog):
         buttonBox.addButton(finishButton, QDialogButtonBox.AcceptRole)
         # Place everything into a parent layout for the dialog window:
         mainLayout = QVBoxLayout(self)
-        mainLayout.addWidget(grid)
+        if "label" in task:
+            name = task["label"]
+        else:
+            name = task["key"]
+        mainLayout.addWidget(QLabel(f"<b>Task:</b> {name}"))
+        mainLayout.addWidget(QLabel(f"<b>Subject:</b> {user_input['sub']}"))
+        mainLayout.addWidget(QLabel(f"<b>Session:</b> {user_input['ses']}"))
+        mainLayout.addWidget(QLabel(f"<b>Run</b>: {user_input['run']}"))
+        if "acq" in user_input and user_input["acq"] != "":
+            mainLayout.addWidget(QLabel(f"<b>Acq:</b> {user_input['acq']}"))
         mainLayout.addWidget(progressBar)
-        mainLayout.addWidget(
-            QLabel(
-                "<b>Recording to file:</b> " + parent.recorder.data_file_base + ".csv"
-            )
-        )
-        mainLayout.addWidget(
-            QLabel(
-                "<b>Output directory:</b>\n"
-                + os.path.realpath(parent.recorder.data_path)
-            )
-        )
+        mainLayout.addWidget(QLabel(parent.recorder.data_file_base + ".csv"))
         mainLayout.addWidget(buttonBox)
         buttonBox.accepted.connect(self.accept)
 

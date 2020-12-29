@@ -1,4 +1,5 @@
 import argparse
+import os.path
 import logging
 import sys
 from PyQt5.QtCore import Qt
@@ -216,7 +217,7 @@ class MainWindow(QMainWindow):
                 )  # default to first task when loading config
                 self.set_tasks_menu()
                 logging.info("Using configuration loaded from " + self.config_file)
-                self.statusBar().showMessage("Active config file: " + self.config_file)
+                self.statusBar().showMessage("Active config file: " + os.path.split(self.config_file)[1])
             except Exception as e:
                 QMessageBox.critical(
                     self, "Invalid config file!", str(e), QMessageBox.Ok
