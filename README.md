@@ -58,7 +58,7 @@ Learn more about each of these interfaces in the sections below.
 
 The GUI provides controls for starting and stopping recordings. It prompts you for run information (BIDS fields) at the start of each recording run.
 
-![Screenshot](screenshot.png)
+![Screenshot animation](animation.gif)
 
 1. Launch the GUI by running the command: `senserecord-gui`
 2. In the menu bar, select **File > Load configuration file** and load your `.yml` file. Use the example configuration files in [`/examples`](examples) to create your config file.
