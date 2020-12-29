@@ -148,14 +148,14 @@ class BoardRecord(object):
             if bool(self.modality):
                 self.data_type = self.modality
             else:
-                self.data_type = "DATA-TYPE-UNKNOWN"
+                self.data_type = "eeg"
         if not bool(self.modality):
             # No modality was given in config or user input,
             # so provide a sensible default:
             if bool(self.data_type):
                 self.modality = self.data_type
             else:
-                self.modality = "MODALITY-UNKNOWN"
+                self.modality = "eeg"
         # Construct the path to the recording output directory:
         self.data_path = os.path.join(
             self.bidsroot,
@@ -182,7 +182,7 @@ class BoardRecord(object):
             + "_run-"
             + self.run
             + "_"
-            + self.modality
+            + self.data_type
         )
         # Ensure that the file does not already exist:
         if os.path.exists(self.data_path + self.data_file_base + ".csv"):
@@ -190,7 +190,7 @@ class BoardRecord(object):
                 f"A file already exists at {self.data_path + self.data_file_base + '.csv'}.\n\nYou must either delete the file from its current location, or enter different information when starting the recording."
             )
         self.file_param = (
-            "file://" + self.data_path + self.data_file_base + ".csv" + ":w"
+            "file://" + self.data_path + self.data_file_base + ".csv:w"
         )
 
     def write_sidecar(self):
