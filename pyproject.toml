@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "senserecord"
-version = "0.1.0"
+version = "0.1.1"
 description = "A cross-platform application for saving data streams from biosensor hardware."
 authors = ["Link Swanson <link@swanson.link>"]
 license = "GPL-3.0-or-later"

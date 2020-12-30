@@ -18,4 +18,4 @@ along with Sense Record.  If not, see <https://www.gnu.org/licenses/>.
 __author__ = "Link Swanson"
 __copyright__ = "Copyright (C) 2020 Link Swanson"
 __license__ = "GPL-3.0-or-later"
-__version__ = "0.1.0"
+__version__ = "0.1.1"
