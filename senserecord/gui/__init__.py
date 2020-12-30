@@ -64,8 +64,6 @@ class MainWindow(QMainWindow):
         # containerLayout.addWidget(logTextBox.widget)
         container.setLayout(containerLayout)
         self.setCentralWidget(container)
-        # Set initial window width:
-        self.setMinimumWidth(1000)
         # Window title:
         self.setWindowTitle("Sense Record")
         self.setWindowIcon(
