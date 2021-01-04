@@ -109,7 +109,7 @@ class BoardRecord(object):
         # Start streaming data from the board, save data to an output file:
         try:
             self.board.prepare_session()
-            self.board.start_stream(45000, self.file_param)
+            self.board.start_stream(streamer_params=self.file_param)
             self.is_recording = True
             self.is_ready = False
         except Exception as e:
