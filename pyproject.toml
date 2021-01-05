@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "senserecord"
-version = "0.1.2"
+version = "0.1.4"
 description = "A cross-platform application for saving data streams from biosensor hardware."
 authors = ["Link Swanson <link@swanson.link>"]
 license = "GPL-3.0-or-later"
@@ -27,7 +27,6 @@ senserecord-http = "senserecord.main:http"
 python = "^3.7"
 PyYAML = "^5.3.1"
 brainflow = "^3.8.1"
-PyQt5 = "^5.15.0"
 QtAwesome = "^1.0.1"
 typer = {extras = ["all"], version = "^0.3.2"}
 fastapi = "^0.61.2"
