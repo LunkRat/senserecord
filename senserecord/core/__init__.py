@@ -37,7 +37,10 @@ class BoardRecord(object):
             self.board_id = BoardIds[self.board_name].value
         # Get and set vars with basic info about the board:
         self.sample_rate = BoardShim.get_sampling_rate(self.board_id)
-        self.channel_names = BoardShim.get_eeg_names(self.board_id)
+        try:
+            self.channel_names = BoardShim.get_eeg_names(self.board_id)
+        except Exception:
+            self.channel_names = []
         self.channel_count = len(BoardShim.get_eeg_channels(self.board_id))
         # Prepare the board params object:
         self.params = BrainFlowInputParams()
